@@ -1,96 +1,42 @@
-import React, { useState } from 'react';
-
-// --- สไตล์แบบรีดไขมัน (เพรียวบาง พรีเมียม ไม่ล้นจอ) ---
-const styles = {
-  container: { backgroundColor: "#0a0a0a", minHeight: "100vh", padding: "12px", color: "#fff", fontFamily: "sans-serif", boxSizing: "border-box" },
-  header: { display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #222", paddingBottom: "10px", marginBottom: "15px" },
-  brand: { color: "#E6C068", fontSize: "14px", fontWeight: "900", fontFamily: "'Noto Serif JP', serif" },
-  info: { fontSize: "10px", color: "#666" },
-  loginBox: { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "80vh" },
-  input: { padding: "12px", width: "240px", backgroundColor: "#111", border: "1px solid #333", color: "#E6C068", borderRadius: "8px", textAlign: "center", marginBottom: "10px", outline: "none" },
-  btnGold: { padding: "12px", width: "240px", background: "linear-gradient(135deg, #E6C068, #C9A227)", color: "#000", border: "none", borderRadius: "8px", fontWeight: "bold", cursor: "pointer" },
-  menuGroup: { display: "flex", flexDirection: "column", gap: "10px", marginTop: "20px" },
-  mainBtn: { padding: "18px", backgroundColor: "#151515", color: "#E6C068", border: "1px solid #333", borderRadius: "10px", fontSize: "16px", fontWeight: "bold" },
-  summaryBtn: { padding: "18px", background: "transparent", color: "#C9A227", border: "1px solid #C9A227", borderRadius: "10px", fontSize: "16px", fontWeight: "bold" },
-  table: { width: "100%", borderCollapse: "collapse", fontSize: "11px", tableLayout: "fixed", marginTop: "10px" },
-  th: { padding: "8px 5px", textAlign: "left", color: "#888", borderBottom: "1px solid #333" },
-  td: { padding: "10px 5px", borderBottom: "1px solid #111", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }
-};
+/* โค้ดสะพานใหม่ 2026 - สว่างไสว เข้าได้แน่นอน */
+import React, { useState, useEffect } from 'react';
 
 export default function App() {
-  const [session, setSession] = useState(null); // { user: '', role: '' }
-  const [view, setView] = useState('MAIN'); // MAIN, BAR, KITCHEN, SUMMARY
+  const [view, setView] = useState('MAIN');
+  const [user, setUser] = useState("");
+  const [isLogin, setIsLogin] = useState(false);
 
-  // ข้อมูลจำลอง (บัญชี 4 คอลัมน์)
-  const mockLogs = [
-    { recorder: "ต้มจืด", item: "Asahi 640ml", change: "+24", date: "06/03" },
-    { recorder: "STAFF_A", item: "Salmon Sliced", change: "-10", date: "06/03" }
-  ];
-
+  // ฟังก์ชันล็อกอิน (ใช้ชื่อไหน โชว์ชื่อนั้น ไม่มโน)
   const handleLogin = (u, p) => {
-    if (!u || !p) return alert("กรุณากรอก Username และ Password");
-    // เช็คสิทธิ์และตั้งชื่อโชว์จริง
-    const displayName = u.toUpperCase().includes("ADMIN") ? "ต้มจืด" : u.toUpperCase();
-    setSession({ user: displayName, role: u.toUpperCase().includes("ADMIN") ? "ADMIN" : "USER" });
+    if (!u || !p) return alert("กรุณาใส่ Username และ Password");
+    setUser(u.toUpperCase());
+    setIsLogin(true);
   };
 
-  if (!session) return <LoginScreen onLogin={handleLogin} />;
+  if (!isLogin) return <LoginScreen onLogin={handleLogin} />;
 
   return (
     <div style={styles.container}>
-      {/* 1. Header (หัวมุม) */}
-      <div style={styles.header}>
+      <header style={styles.header}>
         <div style={styles.brand}>HAUS IZAKAYA</div>
-        <div style={styles.info}>👤 {session.user} | 🕒 06/03/26</div>
-      </div>
+        <div style={styles.user}>👤 {user}</div>
+      </header>
 
-      {/* --- หน้าหลัก: 3 ปุ่มเมนูหลัก --- */}
       {view === 'MAIN' && (
-        <div style={styles.menuGroup}>
-          <button onClick={() => setView('BAR')} style={styles.mainBtn}>🍺 สต็อกบาร์</button>
-          <button onClick={() => setView('KITCHEN')} style={styles.mainBtn}>🍳 สต็อกครัว</button>
-          <button onClick={() => setView('SUMMARY')} style={styles.summaryBtn}>📊 วิว สต็อกซิสเต็ม</button>
-          <button onClick={() => setSession(null)} style={{ color: '#444', background: 'none', border: 'none', marginTop: '20px', fontSize: '11px' }}>LOGOUT</button>
+        <div style={styles.menuBox}>
+          <button onClick={() => setView('BAR')} style={styles.btn}>🍺 สต็อกบาร์</button>
+          <button onClick={() => setView('KITCHEN')} style={styles.btn}>🍳 สต็อกครัว</button>
+          <button onClick={() => setView('SUMMARY')} style={styles.btnGold}>📊 วิว สต็อกซิสเต็ม</button>
+          <button onClick={() => setIsLogin(false)} style={styles.btnLogout}>LOGOUT</button>
         </div>
       )}
 
-      {/* --- หน้าจัดการ (บาร์/ครัว) --- */}
-      {(view === 'BAR' || view === 'KITCHEN') && (
-        <div>
-          <button onClick={() => setView('MAIN')} style={{ color: '#666', background: 'none', border: 'none', marginBottom: '10px' }}>← กลับ</button>
-          <h2 style={{ color: '#E6C068', textAlign: 'center', fontSize: '16px' }}>จัดการ {view}</h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '15px' }}>
-            <button style={{ ...styles.mainBtn, backgroundColor: '#27ae60', color: '#fff' }}>➕ เพิ่มของเข้า</button>
-            <button style={{ ...styles.mainBtn, backgroundColor: '#e67e22', color: '#fff' }}>➖ ตัดของออก</button>
-          </div>
-        </div>
-      )}
-
-      {/* --- หน้าบัญชีสรุปยอด (ราชินีสรุปยอด 4 คอลัมน์) --- */}
-      {view === 'SUMMARY' && (
-        <div>
-          <button onClick={() => setView('MAIN')} style={{ color: '#666', background: 'none', border: 'none', marginBottom: '10px' }}>← กลับ</button>
-          <h2 style={{ color: '#C9A227', textAlign: 'center', fontSize: '16px' }}>👑 บัญชีสรุปยอด</h2>
-          <table style={styles.table}>
-            <thead>
-              <tr>
-                <th style={styles.th}>คนลง</th>
-                <th style={styles.th}>รายการ</th>
-                <th style={styles.th}>สรุป</th>
-                <th style={styles.th}>วันที่</th>
-              </tr>
-            </thead>
-            <tbody>
-              {mockLogs.map((log, i) => (
-                <tr key={i}>
-                  <td style={styles.td}>{log.recorder}</td>
-                  <td style={styles.td}>{log.item}</td>
-                  <td style={{ ...styles.td, color: log.change.includes('+') ? '#2ecc71' : '#e74c3c', fontWeight: 'bold' }}>{log.change}</td>
-                  <td style={styles.td}>{log.date}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {/* ปุ่มกดกลับหน้าหลัก */}
+      {view !== 'MAIN' && (
+        <div style={{padding: '10px'}}>
+          <button onClick={() => setView('MAIN')} style={styles.back}>← กลับหน้าหลัก</button>
+          <h2 style={{textAlign:'center', color:'#E6C068'}}>{view} SYSTEM</h2>
+          {/* ข้อมูลจะตามมาในขั้นตอนถัดไป */}
         </div>
       )}
     </div>
@@ -101,11 +47,27 @@ function LoginScreen({ onLogin }) {
   const [u, setU] = useState("");
   const [p, setP] = useState("");
   return (
-    <div style={{ ...styles.container, ...styles.loginBox }}>
-      <h1 style={{ ...styles.brand, fontSize: '28px', marginBottom: '30px' }}>HAUS IZAKAYA</h1>
-      <input style={styles.input} placeholder="USERNAME" onChange={(e) => setU(e.target.value)} />
-      <input style={styles.input} type="password" placeholder="PASSWORD" onChange={(e) => setP(e.target.value)} />
-      <button onClick={() => onLogin(u, p)} style={styles.btnGold}>LOGIN</button>
+    <div style={styles.loginPage}>
+      <h1 style={styles.title}>HAUS IZAKAYA</h1>
+      <input style={styles.input} placeholder="USERNAME" onChange={e => setU(e.target.value)} />
+      <input style={styles.input} type="password" placeholder="PASSWORD" onChange={e => setP(e.target.value)} />
+      <button style={styles.loginBtn} onClick={() => onLogin(u, p)}>ENTER</button>
     </div>
   );
 }
+
+const styles = {
+  container: { backgroundColor: '#0a0a0a', minHeight: '100vh', color: '#fff', fontFamily: 'sans-serif' },
+  header: { display: 'flex', justifyContent: 'space-between', padding: '15px', borderBottom: '1px solid #222' },
+  brand: { color: '#E6C068', fontWeight: 'bold' },
+  user: { fontSize: '12px', color: '#888' },
+  loginPage: { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh' },
+  title: { color: '#E6C068', marginBottom: '30px', fontSize: '28px' },
+  input: { padding: '12px', marginBottom: '10px', width: '250px', borderRadius: '5px', border: '1px solid #333', backgroundColor: '#111', color: '#fff' },
+  loginBtn: { padding: '12px', width: '276px', backgroundColor: '#E6C068', border: 'none', borderRadius: '5px', fontWeight: 'bold' },
+  menuBox: { display: 'flex', flexDirection: 'column', gap: '10px', padding: '20px' },
+  btn: { padding: '20px', backgroundColor: '#151515', color: '#E6C068', border: '1px solid #333', borderRadius: '10px', fontSize: '18px', fontWeight: 'bold' },
+  btnGold: { padding: '20px', backgroundColor: 'transparent', color: '#E6C068', border: '2px solid #E6C068', borderRadius: '10px', fontSize: '18px', fontWeight: 'bold' },
+  btnLogout: { marginTop: '20px', color: '#444', background: 'none', border: 'none', textDecoration: 'underline' },
+  back: { color: '#666', background: 'none', border: 'none', marginBottom: '10px' }
+};
