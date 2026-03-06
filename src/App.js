@@ -1,20 +1,21 @@
 import React, { useState } from 'react';
 
 export default function App() {
-  const [view, setView] = useState('MAIN'); // หน้าจอ: MAIN, BAR, KITCHEN, SUMMARY
-  const [user, setUser] = useState("");
+  const [view, setView] = useState('MAIN'); 
+  const [currentUser, setCurrentUser] = useState(""); // เก็บชื่อยูสเซอร์จริงที่ล็อกอิน
   const [isLogin, setIsLogin] = useState(false);
 
-  // ข้อมูลบัญชีสรุป 4 คอลัมน์ (คนลง, รายการ, สรุป, วันที่)
+  // ข้อมูลจำลองหน้าบัญชี (4 คอลัมน์: คนลง, รายการ, สรุป, วันที่)
   const mockData = [
-    { recorder: "ต้มจืด", item: "Asahi 640ml", change: "+24", date: "06/03" },
-    { recorder: "พนักงาน A", item: "Salmon Sliced", change: "-10", date: "06/03" },
-    { recorder: "ต้มจืด", item: "Sake Junmai", change: "+5", date: "05/03" }
+    { recorder: "STAFF_A", item: "Asahi 640ml", change: "+24", date: "06/03" },
+    { recorder: "ADMIN_HAUS", item: "Salmon Sliced", change: "-10", date: "06/03" }
   ];
 
-  const handleLogin = (name) => {
-    if (!name) return alert("กรุณาใส่ชื่อผู้ใช้งาน");
-    setUser(name.toUpperCase() === "ADMIN_HAUS" ? "ต้มจืด" : name);
+  const handleLogin = (username, password) => {
+    if (!username || !password) return alert("กรุณากรอกให้ครบทั้ง Username และ Password");
+    
+    // ตั้งค่า User ตามที่พิมพ์มาจริงๆ (ไม่มโนชื่อใหม่)
+    setCurrentUser(username.toUpperCase());
     setIsLogin(true);
   };
 
@@ -22,39 +23,39 @@ export default function App() {
 
   return (
     <div style={styles.appContainer}>
-      {/* --- ส่วนหัว (Header) --- */}
+      {/* --- ส่วนหัว (Header): โชว์ยูสเซอร์ที่ใช้งานอยู่จริง --- */}
       <div style={styles.header}>
         <div style={styles.headerBrand}>HAUS IZAKAYA</div>
-        <div style={styles.headerInfo}>👤 {user} | 🕒 {new Date().toLocaleDateString('th-TH')}</div>
+        <div style={styles.headerInfo}>👤 USER: {currentUser} | 🕒 06/03/26</div>
       </div>
 
-      {/* --- หน้าแรก: 3 ปุ่มเมนูหลัก (ราชินีสั่งลุย) --- */}
+      {/* --- หน้าแรก: 3 ปุ่มเมนูหลัก --- */}
       {view === 'MAIN' && (
         <div style={styles.menuWrapper}>
           <button onClick={() => setView('BAR')} style={styles.mainBtn}>🍺 สต็อกบาร์</button>
           <button onClick={() => setView('KITCHEN')} style={styles.mainBtn}>🍳 สต็อกครัว</button>
           <button onClick={() => setView('SUMMARY')} style={styles.summaryBtnMain}>📊 วิว สต็อกซิสเต็ม</button>
-          <button onClick={() => setIsLogin(false)} style={styles.logoutBtn}>ออกจากระบบ</button>
+          <button onClick={() => setIsLogin(false)} style={styles.logoutBtn}>LOGOUT</button>
         </div>
       )}
 
       {/* --- หน้าจัดการสต็อก --- */}
       {(view === 'BAR' || view === 'KITCHEN') && (
-        <div style={styles.pageContent}>
+        <div>
           <button onClick={() => setView('MAIN')} style={styles.backLink}>← กลับหน้าหลัก</button>
-          <h2 style={styles.pageTitle}>จัดการ {view === 'BAR' ? 'บาร์' : 'ครัว'}</h2>
+          <h2 style={styles.pageTitle}>จัดการ {view}</h2>
           <div style={styles.actionGroup}>
-            <button style={{ ...styles.actionBtn, backgroundColor: '#27ae60' }}>➕ เพิ่มของเข้า</button>
-            <button style={{ ...styles.actionBtn, backgroundColor: '#e67e22' }}>➖ ตัดของออก</button>
+            <button style={{ ...styles.actionBtn, backgroundColor: '#27ae60' }}>➕ เพิ่มของ</button>
+            <button style={{ ...styles.actionBtn, backgroundColor: '#e67e22' }}>➖ ตัดของ</button>
           </div>
         </div>
       )}
 
-      {/* --- หน้าบัญชีสรุปยอด (4 คอลัมน์ ไม่ล้นจอ) --- */}
+      {/* --- หน้าบัญชีสรุปยอด (4 คอลัมน์: คนลง, รายการ, สรุป, วันที่) --- */}
       {view === 'SUMMARY' && (
-        <div style={styles.pageContent}>
+        <div>
           <button onClick={() => setView('MAIN')} style={styles.backLink}>← กลับหน้าหลัก</button>
-          <h2 style={styles.pageTitle}>👑 ราชินีสรุปยอด</h2>
+          <h2 style={styles.pageTitle}>👑 บัญชีสรุปยอด</h2>
           
           <div style={styles.tableWrapper}>
             <table style={styles.table}>
@@ -77,6 +78,13 @@ export default function App() {
                     <td style={styles.td}>{row.date}</td>
                   </tr>
                 ))}
+                {/* แถวตัวอย่างเมื่อยูสเซอร์ปัจจุบันลงข้อมูล */}
+                <tr style={styles.tr}>
+                  <td style={styles.td}>{currentUser}</td>
+                  <td style={styles.td}>รายการล่าสุด</td>
+                  <td style={styles.td}>...</td>
+                  <td style={styles.td}>06/03</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -86,44 +94,44 @@ export default function App() {
   );
 }
 
+// --- หน้าจอ Login (เรียก Password กลับมาแล้ว!) ---
 function LoginScreen({ onLogin }) {
-  const [input, setInput] = useState("");
+  const [u, setU] = useState("");
+  const [p, setP] = useState("");
+
   return (
     <div style={styles.loginContainer}>
       <h1 style={styles.brandTitle}>HAUS IZAKAYA</h1>
-      <input 
-        style={styles.loginInput} 
-        placeholder="USERNAME" 
-        onChange={(e) => setInput(e.target.value)}
-        onKeyPress={(e) => e.key === 'Enter' && onLogin(input)}
-      />
-      <button onClick={() => onLogin(input)} style={styles.loginBtn}>ENTER SYSTEM</button>
+      <div style={styles.formGroup}>
+        <input style={styles.loginInput} placeholder="USERNAME" onChange={(e) => setU(e.target.value)} />
+        <input style={styles.loginInput} type="password" placeholder="PASSWORD" onChange={(e) => setP(e.target.value)} />
+        <button onClick={() => onLogin(u, p)} style={styles.loginBtn}>LOGIN</button>
+      </div>
     </div>
   );
 }
 
-// --- CSS Styles (ปรับปรุงล่าสุด: รีดไขมัน ไม่เบียดจอ) ---
+// --- CSS Styles (รีดให้เพรียว ไม่ล้นจอ S25 Ultra) ---
 const styles = {
   appContainer: { backgroundColor: '#0a0a0a', minHeight: '100vh', padding: '12px', color: '#fff', boxSizing: 'border-box' },
-  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '1px solid #222', paddingBottom: '8px', marginBottom: '15px' },
-  headerBrand: { color: '#E6C068', fontSize: '13px', fontWeight: '900', fontFamily: "'Noto Serif JP', serif", letterSpacing: '1px' },
+  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #222', paddingBottom: '10px', marginBottom: '15px' },
+  headerBrand: { color: '#E6C068', fontSize: '12px', fontWeight: '900', fontFamily: "'Noto Serif JP', serif" },
   headerInfo: { fontSize: '9px', color: '#666' },
-  loginContainer: { backgroundColor: '#0a0a0a', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px' },
-  brandTitle: { color: '#E6C068', fontSize: '26px', fontWeight: '900', fontFamily: "'Noto Serif JP', serif", marginBottom: '25px', textAlign: 'center' },
-  loginInput: { padding: '12px', width: '100%', maxWidth: '240px', backgroundColor: '#111', border: '1px solid #333', color: '#E6C068', borderRadius: '8px', textAlign: 'center', marginBottom: '12px', outline: 'none', fontSize: '14px' },
-  loginBtn: { padding: '12px', width: '100%', maxWidth: '240px', background: 'linear-gradient(135deg, #E6C068, #C9A227)', color: '#000', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', fontSize: '14px' },
-  menuWrapper: { display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '5%' },
-  mainBtn: { padding: '16px', backgroundColor: '#151515', color: '#E6C068', border: '1px solid #333', borderRadius: '10px', fontSize: '15px', fontWeight: 'bold', cursor: 'pointer' },
-  summaryBtnMain: { padding: '16px', backgroundColor: 'transparent', color: '#C9A227', border: '1px solid #C9A227', borderRadius: '10px', fontSize: '15px', fontWeight: 'bold', cursor: 'pointer' },
-  logoutBtn: { marginTop: '15px', background: 'none', border: 'none', color: '#444', fontSize: '11px', textDecoration: 'underline' },
-  pageContent: { animation: 'fadeIn 0.2s ease' },
-  pageTitle: { color: '#E6C068', fontSize: '16px', textAlign: 'center', marginBottom: '15px', fontWeight: 'bold' },
-  backLink: { background: 'none', border: 'none', color: '#555', fontSize: '11px', marginBottom: '8px', cursor: 'pointer', padding: '0' },
+  loginContainer: { backgroundColor: '#0a0a0a', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' },
+  brandTitle: { color: '#E6C068', fontSize: '26px', fontWeight: '900', fontFamily: "'Noto Serif JP', serif", marginBottom: '30px' },
+  formGroup: { display: 'flex', flexDirection: 'column', gap: '10px', width: '240px' },
+  loginInput: { padding: '12px', backgroundColor: '#111', border: '1px solid #333', color: '#E6C068', borderRadius: '6px', textAlign: 'center', outline: 'none' },
+  loginBtn: { padding: '12px', background: 'linear-gradient(135deg, #E6C068, #C9A227)', color: '#000', border: 'none', borderRadius: '6px', fontWeight: 'bold' },
+  menuWrapper: { display: 'flex', flexDirection: 'column', gap: '10px' },
+  mainBtn: { padding: '18px', backgroundColor: '#151515', color: '#E6C068', border: '1px solid #333', borderRadius: '10px', fontSize: '16px', fontWeight: 'bold' },
+  summaryBtnMain: { padding: '18px', backgroundColor: 'transparent', color: '#C9A227', border: '1px solid #C9A227', borderRadius: '10px', fontSize: '16px', fontWeight: 'bold' },
+  logoutBtn: { marginTop: '20px', background: 'none', border: 'none', color: '#444', fontSize: '11px', textDecoration: 'underline' },
+  pageTitle: { color: '#E6C068', fontSize: '16px', textAlign: 'center', marginBottom: '15px' },
+  backLink: { background: 'none', border: 'none', color: '#555', fontSize: '11px', marginBottom: '5px' },
   actionGroup: { display: 'flex', flexDirection: 'column', gap: '8px' },
   actionBtn: { padding: '14px', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: 'bold' },
-  tableWrapper: { overflowX: 'auto', borderRadius: '8px', border: '1px solid #222', backgroundColor: '#0d0d0d' },
+  tableWrapper: { overflowX: 'auto', borderRadius: '8px', border: '1px solid #222' },
   table: { width: '100%', borderCollapse: 'collapse', fontSize: '11px', tableLayout: 'fixed' },
-  th: { padding: '10px 6px', textAlign: 'left', color: '#666', borderBottom: '1px solid #222', fontWeight: 'normal' },
-  td: { padding: '10px 6px', borderBottom: '1px solid #151515', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-  tr: { borderBottom: '1px solid #111' }
+  th: { padding: '10px 5px', textAlign: 'left', color: '#666', borderBottom: '1px solid #222' },
+  td: { padding: '10px 5px', borderBottom: '1px solid #111', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
 };
