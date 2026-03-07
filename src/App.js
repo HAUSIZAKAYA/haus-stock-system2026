@@ -15,6 +15,7 @@ export default function App() {
     setUser(u.toUpperCase()); // ล็อกอินชื่อไหน โชว์ชื่อนั้นเป๊ะๆ
     setIsLogin(true);
   };
+  
 
   if (!isLogin) return (
     <div style={styles.loginContainer}>
